@@ -1,4 +1,4 @@
-# Proxy Scraper
+# Spyder Parse
 
 A Scrapy-based spider that scrapes proxies from [advanced.name/freeproxy](https://advanced.name/freeproxy) and uploads them to a specified endpoint.
 
@@ -14,30 +14,14 @@ A Scrapy-based spider that scrapes proxies from [advanced.name/freeproxy](https:
 
 ## Requirements
 
-- Python 3.8+
-- Poetry (recommended) or pip
+- Python 3.11+
+- Poetry
 
 ## Installation
-
-### Using Poetry (recommended)
 
 ```bash
 # Install dependencies
 poetry install
-
-# Activate virtual environment
-poetry shell
-```
-
-### Using pip
-
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install scrapy python-dotenv
 ```
 
 ## Configuration
@@ -54,39 +38,18 @@ PERSONAL_TOKEN=your_actual_personal_token_here
 
 ## Usage
 
-### Using Poetry
-
 ```bash
-# Run the spider
-poetry run python -m proxy_scraper.run
+# Simple run (recommended)
+python run.py
 
-# Or using the script command
-poetry run proxy-scraper
-
-# Or using scrapy directly
+# Or with Poetry directly
 poetry run scrapy crawl proxy_spider
-```
 
-### Using pip
-
-```bash
-# Run the spider
-python -m proxy_scraper.run
-
-# Or using scrapy directly
-scrapy crawl proxy_spider
-```
-
-### Command line token override
-
-```bash
-# Override environment token
-scrapy crawl proxy_spider -a token=your_token_here
+# Or with token override
+python run.py YOUR_TOKEN
 ```
 
 ## Output Files
-
-The spider generates three files:
 
 ### `proxies.json`
 ```json
@@ -95,11 +58,6 @@ The spider generates three files:
     "ip": "0.0.0.0",
     "port": 8080,
     "protocols": ["HTTP", "HTTPS"]
-  },
-  {
-    "ip": "1.1.1.1",
-    "port": 3180,
-    "protocols": ["SOCKS4", "SOCKS5"]
   }
 ]
 ```
@@ -107,8 +65,7 @@ The spider generates three files:
 ### `results.json`
 ```json
 {
-  "save_id_1": ["proxy1", "proxy2", "..."],
-  "save_id_2": ["proxy3", "proxy4", "..."]
+  "save_id_1": ["proxy1", "proxy2", "..."]
 }
 ```
 
@@ -120,41 +77,17 @@ The spider generates three files:
 ## Project Structure
 
 ```
-proxy-scraper/
-├── proxy_scraper/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── run.py
-│   └── spiders/
-│       ├── __init__.py
-│       └── proxy_spider.py
-├── .env.example
-├── .gitignore
-├── pyproject.toml
-├── scrapy.cfg
-└── README.md
-```
-
-## Security
-
-- Personal tokens are stored in `.env` file (not committed to Git)
-- `.env` is included in `.gitignore`
-- Environment variables take precedence over command line arguments
-
-## Development
-
-### Code formatting
-
-```bash
-# Format code
-poetry run black proxy_scraper/
-poetry run isort proxy_scraper/
-```
-
-### Running tests
-
-```bash
-poetry run pytest
+Spyder_parse/
+├── .env.example          # Environment template
+├── .gitignore           # Git exclusions
+├── README.md            # Documentation
+├── pyproject.toml       # Poetry dependencies
+├── scrapy.cfg          # Scrapy configuration
+├── settings.py         # Scrapy settings
+├── run.py              # Simple runner script
+└── spiders/
+    ├── __init__.py
+    └── proxy_spider.py  # Main spider
 ```
 
 ## Technical Details
@@ -162,15 +95,7 @@ poetry run pytest
 - **Framework**: Pure Scrapy (no external extensions)
 - **Performance**: Optimized for <5 minutes execution
 - **Headers**: All requests include required `sec-fetch-mode: navigate`
-- **Error Handling**: Robust parsing with fallback methods
-- **Logging**: Comprehensive logging for debugging
-
-## Troubleshooting
-
-1. **Missing .env file**: Copy `.env.example` to `.env` and add your token
-2. **Import errors**: Ensure you're in the Poetry shell or virtual environment
-3. **Network errors**: Check internet connection and website availability
-4. **Parsing errors**: Check if website structure has changed
+- **Security**: Personal tokens stored in `.env` file
 
 ## License
 
