@@ -9,7 +9,6 @@ from scrapy.utils.project import get_project_settings
 
 def main():
     """Run the proxy spider"""
-    # Check if .env file exists
     env_file = Path(".env")
     if not env_file.exists():
         print("❌ .env file not found!")
@@ -17,16 +16,12 @@ def main():
         print("💡 You can copy .env.example to .env and edit it")
         return 1
 
-    # Get settings
     settings = get_project_settings()
 
-    # Create crawler process
     process = CrawlerProcess(settings)
 
-    # Add spider
     process.crawl("proxy_spider")
 
-    # Start crawling
     print("🕷️  Starting proxy scraper...")
     process.start()
 

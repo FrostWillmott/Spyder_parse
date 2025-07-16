@@ -9,7 +9,6 @@ import time
 
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 
@@ -33,7 +32,6 @@ class ProxySpider(scrapy.Spider):
     def __init__(self, token: str | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Get token from CLI argument or environment
         self.personal_token = token or os.getenv("PERSONAL_TOKEN")
 
         if not self.personal_token:
@@ -58,7 +56,6 @@ class ProxySpider(scrapy.Spider):
         """Parse proxies from the website"""
         self.logger.info("Parsing proxies from advanced.name/freeproxy")
 
-        # Find proxy table rows
         rows = response.css("table tbody tr")
         if not rows:
             rows = response.css("table tr:not(:first-child)")
@@ -67,7 +64,6 @@ class ProxySpider(scrapy.Spider):
             self.logger.error("Could not find proxy table")
             return
 
-        # Parse first 150 proxies
         for i, row in enumerate(rows[:150]):
             proxy = self._parse_proxy_row(row, i + 1)
             if proxy:
@@ -75,10 +71,8 @@ class ProxySpider(scrapy.Spider):
 
         self.logger.info(f"Successfully parsed {len(self.proxies)} proxies")
 
-        # Save proxies to file
         self._save_proxies()
 
-        # Upload proxies
         yield from self._upload_proxies()
 
     def _parse_proxy_row(self, row, row_num: int) -> dict | None:
@@ -88,13 +82,11 @@ class ProxySpider(scrapy.Spider):
             if len(cells) < 2:
                 return None
 
-            # Extract IP
             ip = cells[0].css("::text").get()
             if not ip:
                 return None
             ip = ip.strip()
 
-            # Extract port
             port_text = cells[1].css("::text").get()
             if not port_text:
                 return None
@@ -104,7 +96,6 @@ class ProxySpider(scrapy.Spider):
             except ValueError:
                 return None
 
-            # Extract protocols
             protocols = self._extract_protocols(cells[2] if len(cells) > 2 else None)
 
             proxy = {
@@ -128,7 +119,6 @@ class ProxySpider(scrapy.Spider):
         cell_text = protocol_cell.get().upper()
         protocols = []
 
-        # Check for specific protocols
         if "HTTPS" in cell_text:
             protocols.extend(["HTTP", "HTTPS"])
         elif "HTTP" in cell_text:
@@ -202,22 +192,18 @@ class ProxySpider(scrapy.Spider):
 
         self.logger.info(f"Processing upload response for chunk {chunk_index + 1}")
 
-        # Extract save_id from response
         save_id = self._extract_save_id(response.text, chunk_index)
 
-        # Store results
         self.results[save_id] = chunk_proxies
 
         self.logger.info(f"Chunk {chunk_index + 1} uploaded with save_id: {save_id}")
 
-        # Check if all chunks are processed
         expected_chunks = (len(self.proxies) + 49) // 50  # Ceiling division
         if len(self.results) >= expected_chunks:
             self._finalize_spider()
 
     def _extract_save_id(self, response_text: str, chunk_index: int) -> str:
         """Extract save_id from upload response"""
-        # Try various patterns to find save_id
         patterns = [
             r'save_id["\']?\s*:\s*["\']?([^"\'>\s]+)',
             r"save_id=([^&\s]+)",
@@ -232,14 +218,12 @@ class ProxySpider(scrapy.Spider):
                 self.logger.debug(f"Found save_id using pattern: {save_id}")
                 return save_id
 
-        # Fallback: generate save_id
         save_id = f"upload_{int(time.time())}_{chunk_index}"
         self.logger.warning(f"Could not extract save_id, using: {save_id}")
         return save_id
 
     def _finalize_spider(self):
         """Save results and execution time"""
-        # Save upload results
         try:
             with open("results.json", "w") as f:
                 json.dump(self.results, f, indent=2)
@@ -247,10 +231,8 @@ class ProxySpider(scrapy.Spider):
         except Exception as e:
             self.logger.error(f"Error saving results: {e}")
 
-        # Save execution time
         self._save_execution_time()
 
-        # Log completion
         self.logger.info("Spider execution completed successfully")
         self.logger.info(f"Proxies scraped: {len(self.proxies)}")
         self.logger.info(f"Upload batches: {len(self.results)}")

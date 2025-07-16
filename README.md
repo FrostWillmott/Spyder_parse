@@ -92,8 +92,7 @@ Spyder_parse/
 
 ## Technical Details
 
-- **Framework**: Pure Scrapy (no external extensions)
-- **Performance**: Optimized for <5 minutes execution
+- **Framework**: Pure Scrapy
 - **Headers**: All requests include required `sec-fetch-mode: navigate`
 - **Security**: Personal tokens stored in `.env` file
 
